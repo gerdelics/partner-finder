@@ -9,27 +9,22 @@ export function useAuth() {
   const [authError, setAuthError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Process the pending redirect result (if coming back from Google login)
     getRedirectResult(auth)
       .then(result => {
-        if (result?.user) {
-          // User signed in via redirect — onAuthStateChanged will fire next
-          setAuthError(null)
-        }
+        if (result?.user) setAuthError(null)
       })
       .catch(err => {
-        const code: string = (err as { code?: string }).code ?? ''
+        const code = (err as { code?: string }).code ?? ''
+        // auth/no-auth-event = no pending redirect, this is normal — ignore silently
+        if (code === 'auth/no-auth-event') return
+        console.error('getRedirectResult:', code, err)
         if (code === 'auth/unauthorized-domain') {
-          setAuthError(
-            'Ez a domain nincs engedélyezve Firebase-ben. ' +
-            'Firebase Console → Authentication → Settings → Authorized domains → add: ' +
-            window.location.hostname
-          )
-        } else if (code !== 'auth/no-auth-event') {
-          // auth/no-auth-event is normal (no pending redirect) — ignore it
-          setAuthError(`Bejelentkezési hiba: ${code}`)
+          setAuthError(`Domain nincs engedélyezve Firebase-ben: ${window.location.hostname}`)
+        } else {
+          setAuthError(`Bejelentkezési hiba (${code})`)
         }
-        setLoading(false)
+        // Do NOT call setLoading(false) here — onAuthStateChanged is the
+        // single source of truth for loading state.
       })
 
     const unsubscribe = onAuthStateChanged(auth, firebaseUser => {

@@ -4,8 +4,10 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'path'
 
-// On GitHub Actions the base is the repo sub-path; locally it's root
-const base = process.env.GITHUB_ACTIONS ? '/partner-finder/' : '/'
+// GitHub Pages needs the repo sub-path; Firebase Hosting and local dev use root
+const base = process.env.GITHUB_ACTIONS === 'true' && !process.env.FIREBASE_DEPLOY
+  ? '/partner-finder/'
+  : '/'
 
 export default defineConfig({
   base,
