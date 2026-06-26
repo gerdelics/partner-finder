@@ -8,8 +8,13 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getRedirectResult(auth).catch(() => {})
+    // Handle the result of signInWithRedirect (called after returning from Google)
+    getRedirectResult(auth).catch(() => {
+      // Ignore redirect errors (e.g. user closed Google login page)
+    })
 
+    // onAuthStateChanged fires after getRedirectResult completes,
+    // so loading stays true until we have a definitive auth state
     const unsubscribe = onAuthStateChanged(auth, firebaseUser => {
       setUser(firebaseUser)
       setLoading(false)
