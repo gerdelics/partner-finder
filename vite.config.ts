@@ -4,10 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'path'
 
-// GitHub Pages needs the repo sub-path; Firebase Hosting and local dev use root
-const base = process.env.GITHUB_ACTIONS === 'true' && !process.env.FIREBASE_DEPLOY
-  ? '/partner-finder/'
-  : '/'
+const base = '/'
 
 export default defineConfig({
   base,
