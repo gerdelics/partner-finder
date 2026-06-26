@@ -43,13 +43,9 @@ export function DashboardPage({ user }: DashboardPageProps) {
     setShowConfirm(false)
   }
 
-  const handleSelect = (id: string | null) => {
-    setSelectedId(id)
-  }
-
   return (
     <MainLayout header={<AppHeader user={user} onSignOut={signOut} />}>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3 sm:gap-4">
         <FilterBar
           query={query}
           filters={filters}
@@ -60,13 +56,9 @@ export function DashboardPage({ user }: DashboardPageProps) {
           totalCount={partners.length}
         />
 
-        {/* Toolbar */}
-        <div className="flex flex-wrap gap-2 items-center">
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setModalMode('add')}
-          >
+        {/* Desktop toolbar — hidden on mobile */}
+        <div className="hidden md:flex flex-wrap gap-2 items-center">
+          <Button variant="primary" size="sm" onClick={() => setModalMode('add')}>
             + Új partner
           </Button>
           <Button
@@ -95,10 +87,60 @@ export function DashboardPage({ user }: DashboardPageProps) {
         <PartnerTable
           partners={results}
           selectedId={selectedId}
-          onSelect={handleSelect}
+          onSelect={id => setSelectedId(id)}
           isLoading={loading}
         />
       </div>
+
+      {/* Mobile: FAB for new partner */}
+      <button
+        onClick={() => setModalMode('add')}
+        className={[
+          'fixed bottom-5 right-5 md:hidden z-30',
+          'w-14 h-14 rounded-full bg-blue-700 text-white shadow-xl',
+          'flex items-center justify-center text-3xl leading-none',
+          'active:scale-95 transition-transform',
+          // shift up when partner is selected (bottom bar visible)
+          selectedId ? 'bottom-20' : 'bottom-5',
+        ].join(' ')}
+        aria-label="Új partner"
+      >
+        +
+      </button>
+
+      {/* Mobile: contextual bottom action bar (shown when a partner is selected) */}
+      {selectedId && (
+        <div className="fixed bottom-0 left-0 right-0 md:hidden z-20 bg-white border-t border-gray-200 shadow-lg">
+          <div className="flex items-center px-3 py-2 gap-1">
+            <span className="flex-1 text-sm font-medium text-gray-700 truncate pl-1">
+              {selectedPartner?.name}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setModalMode('edit')}
+              className="shrink-0"
+            >
+              Szerkesztés
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => setShowConfirm(true)}
+              className="shrink-0"
+            >
+              Törlés
+            </Button>
+            <button
+              onClick={() => setSelectedId(null)}
+              className="ml-1 p-1.5 text-gray-400 hover:text-gray-600"
+              aria-label="Kijelölés törlése"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {modalMode && (
         <PartnerModal
