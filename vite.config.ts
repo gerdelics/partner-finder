@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'path'
 
-const base = '/'
+const base = process.env.GITHUB_ACTIONS ? '/partner-finder/' : '/'
 
 export default defineConfig({
   base,
