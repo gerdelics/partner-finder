@@ -2,9 +2,10 @@ import { Button } from '@/components/atoms/Button'
 
 interface LoginPageProps {
   onSignIn: () => void
+  authError?: string | null
 }
 
-export function LoginPage({ onSignIn }: LoginPageProps) {
+export function LoginPage({ onSignIn, authError }: LoginPageProps) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 flex flex-col items-center gap-6 w-full max-w-sm">
@@ -19,6 +20,12 @@ export function LoginPage({ onSignIn }: LoginPageProps) {
         </div>
 
         <div className="w-full h-px bg-gray-100" />
+
+        {authError && (
+          <div className="w-full px-3 py-2 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs">
+            {authError}
+          </div>
+        )}
 
         <Button
           variant="ghost"

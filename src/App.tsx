@@ -14,9 +14,9 @@ function Spinner() {
 }
 
 export default function App() {
-  const { user, loading, signInWithGoogle } = useAuth()
+  const { user, loading, authError, signInWithGoogle } = useAuth()
 
   if (loading) return <Spinner />
-  if (!user) return <LoginPage onSignIn={signInWithGoogle} />
+  if (!user) return <LoginPage onSignIn={signInWithGoogle} authError={authError} />
   return <DashboardPage user={user} />
 }
