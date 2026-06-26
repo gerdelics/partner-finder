@@ -1,0 +1,1 @@
+export { PartnerRow } from './PartnerRow'
