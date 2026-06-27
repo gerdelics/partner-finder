@@ -14,6 +14,41 @@ interface FuvarokPageProps {
 }
 
 type ModalMode = 'add' | 'edit' | null
+type TimeFilter = 'all' | '30d' | 'this-month' | 'last-month' | 'this-year'
+
+const HU_MONTHS = ['Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December']
+
+function timeFilterLabel(f: TimeFilter): string {
+  const now = new Date()
+  if (f === 'all') return 'Összes'
+  if (f === '30d') return 'Elmúlt 30 nap'
+  if (f === 'this-month') return HU_MONTHS[now.getMonth()]
+  if (f === 'last-month') return HU_MONTHS[new Date(now.getFullYear(), now.getMonth() - 1).getMonth()]
+  return `${now.getFullYear()}`
+}
+
+function applyTimeFilter(fuvarok: Fuvar[], f: TimeFilter): Fuvar[] {
+  if (f === 'all') return fuvarok
+  const now = new Date()
+  if (f === '30d') {
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30)
+    const s = cutoff.toISOString().slice(0, 10)
+    return fuvarok.filter(x => x.datum >= s)
+  }
+  if (f === 'this-month') {
+    const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    return fuvarok.filter(x => x.datum.startsWith(prefix))
+  }
+  if (f === 'last-month') {
+    const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const prefix = `${lm.getFullYear()}-${String(lm.getMonth() + 1).padStart(2, '0')}`
+    return fuvarok.filter(x => x.datum.startsWith(prefix))
+  }
+  // this-year
+  return fuvarok.filter(x => x.datum.startsWith(`${now.getFullYear()}`))
+}
+
+const TIME_FILTERS: TimeFilter[] = ['all', '30d', 'this-month', 'last-month', 'this-year']
 
 export function FuvarokPage({ user, partners }: FuvarokPageProps) {
   const { fuvarok, loading, addFuvar, updateFuvar, deleteFuvar } = useFuvarok(user.uid)
@@ -21,6 +56,9 @@ export function FuvarokPage({ user, partners }: FuvarokPageProps) {
   const [editTarget, setEditTarget] = useState<Fuvar | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('this-month')
+
+  const filtered = applyTimeFilter(fuvarok, timeFilter)
 
   const handleSave = async (input: FuvarInput) => {
     setSaving(true)
@@ -45,30 +83,46 @@ export function FuvarokPage({ user, partners }: FuvarokPageProps) {
     setDeleteTarget(null)
   }
 
-  const totalArres = fuvarok.reduce((sum, f) =>
+  const totalArres = filtered.reduce((sum, f) =>
     f.ugyfelAr != null && f.fuvarozóAr != null ? sum + f.ugyfelAr - f.fuvarozóAr : sum, 0)
 
   return (
     <div className="flex flex-col gap-3 sm:gap-4">
+      {/* Time filter chips */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        {TIME_FILTERS.map(f => (
+          <button
+            key={f}
+            onClick={() => setTimeFilter(f)}
+            className={[
+              'shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+              timeFilter === f
+                ? 'bg-slate-800 text-white'
+                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50',
+            ].join(' ')}
+          >
+            {timeFilterLabel(f)}
+          </button>
+        ))}
+      </div>
+
       {/* Summary bar */}
-      {fuvarok.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-white rounded-xl border border-gray-200 px-3 py-2.5 shadow-sm">
-            <p className="text-xs text-gray-400">Fuvarok</p>
-            <p className="font-bold text-gray-800">{fuvarok.length}</p>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 px-3 py-2.5 shadow-sm">
-            <p className="text-xs text-gray-400">Teljesítve</p>
-            <p className="font-bold text-gray-800">{fuvarok.filter(f => f.statusz === 'teljesitve').length}</p>
-          </div>
-          <div className={`rounded-xl border px-3 py-2.5 shadow-sm ${totalArres >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-            <p className="text-xs text-gray-400">Össz. árrés</p>
-            <p className={`font-bold text-sm ${totalArres >= 0 ? 'text-green-700' : 'text-red-600'}`}>
-              {totalArres > 0 ? '+' : ''}{totalArres} €
-            </p>
-          </div>
+      <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="bg-white rounded-xl border border-gray-200 px-3 py-2.5 shadow-sm">
+          <p className="text-xs text-gray-400">Fuvarok</p>
+          <p className="font-bold text-gray-800">{filtered.length}</p>
         </div>
-      )}
+        <div className="bg-white rounded-xl border border-gray-200 px-3 py-2.5 shadow-sm">
+          <p className="text-xs text-gray-400">Teljesítve</p>
+          <p className="font-bold text-gray-800">{filtered.filter(f => f.statusz === 'teljesitve').length}</p>
+        </div>
+        <div className={`rounded-xl border px-3 py-2.5 shadow-sm ${totalArres >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+          <p className="text-xs text-gray-400">Össz. árrés</p>
+          <p className={`font-bold text-sm ${totalArres >= 0 ? 'text-green-700' : 'text-red-600'}`}>
+            {totalArres > 0 ? '+' : ''}{totalArres} €
+          </p>
+        </div>
+      </div>
 
       {/* Toolbar */}
       <div className="hidden md:flex gap-2 items-center">
@@ -76,8 +130,8 @@ export function FuvarokPage({ user, partners }: FuvarokPageProps) {
           className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg">
           + Új fuvar
         </button>
-        {fuvarok.length > 0 && (
-          <button onClick={() => exportFuvarok(fuvarok)}
+        {filtered.length > 0 && (
+          <button onClick={() => exportFuvarok(filtered)}
             className="px-4 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm rounded-lg">
             Exportálás (CSV)
           </button>
@@ -85,7 +139,7 @@ export function FuvarokPage({ user, partners }: FuvarokPageProps) {
       </div>
 
       <FuvarList
-        fuvarok={fuvarok}
+        fuvarok={filtered}
         isLoading={loading}
         onEdit={handleEdit}
         onDelete={id => setDeleteTarget(id)}
