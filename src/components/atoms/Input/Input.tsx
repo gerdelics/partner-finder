@@ -17,8 +17,9 @@ const sizeCls = {
 
 export function Input({
   label, labelSize = 'sm', error,
-  size = 'md', id, className = '', ...props
+  size = 'md', id, type, className = '', ...props
 }: InputProps) {
+  const isDate = type === 'date'
   return (
     <div className="flex flex-col gap-1">
       {label && (
@@ -28,14 +29,23 @@ export function Input({
       )}
       <input
         id={id}
+        type={type}
         {...props}
         className={[
-          'border rounded-lg text-sm w-full transition-colors',
+          'border rounded-lg text-sm w-full transition-colors text-gray-900',
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
           sizeCls[size],
           error ? 'border-red-400' : 'border-gray-300',
+          isDate ? [
+            '[color-scheme:light]',
+            '[&::-webkit-calendar-picker-indicator]:opacity-40',
+            '[&::-webkit-calendar-picker-indicator]:hover:opacity-80',
+            '[&::-webkit-calendar-picker-indicator]:cursor-pointer',
+            '[&::-webkit-calendar-picker-indicator]:rounded',
+            '[&::-webkit-calendar-picker-indicator]:transition-opacity',
+          ].join(' ') : '',
           className,
-        ].join(' ')}
+        ].filter(Boolean).join(' ')}
       />
       {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
