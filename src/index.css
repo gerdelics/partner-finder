@@ -1,1 +1,26 @@
 @import "tailwindcss";
+@import "react-day-picker/style.css";
+
+/* react-day-picker — app theme */
+.rdp-root {
+  --rdp-accent-color: #1e293b;           /* slate-800 */
+  --rdp-accent-background-color: #e2e8f0; /* slate-200 for range middle bg */
+  --rdp-today-color: #2563eb;            /* blue-600 */
+  --rdp-day-height: 36px;
+  --rdp-day-width: 36px;
+  --rdp-day_button-height: 34px;
+  --rdp-day_button-width: 34px;
+  --rdp-nav_button-height: 2rem;
+  --rdp-nav_button-width: 2rem;
+  --rdp-nav-height: 2.5rem;
+  --rdp-selected-border: 2px solid transparent;
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+.rdp-range_middle-background-color { background-color: #e2e8f0; }
+
+/* Hover on unselected days */
+.rdp-day_button:not(:disabled):hover {
+  background-color: #f1f5f9;
+}

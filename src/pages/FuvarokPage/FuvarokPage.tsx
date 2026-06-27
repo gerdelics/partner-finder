@@ -3,7 +3,7 @@ import type { User } from 'firebase/auth'
 import { FuvarList } from '@/components/organisms/FuvarList'
 import { FuvarForm } from '@/components/molecules/FuvarForm'
 import { ConfirmDialog } from '@/components/molecules/ConfirmDialog'
-import { Input } from '@/components/atoms/Input'
+import { DateRangePicker } from '@/components/molecules/DateRangePicker'
 import { useFuvarok } from '@/hooks/useFuvarok'
 import { exportFuvarok } from '@/utils/exportCsv'
 import type { Fuvar, FuvarInput } from '@/types/fuvar'
@@ -104,32 +104,12 @@ export function FuvarokPage({ user, partners }: FuvarokPageProps) {
 
       {/* Date range picker — only when custom is selected */}
       {quickFilter === 'custom' && (
-        <div className="flex flex-wrap items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2.5">
-          <span className="text-xs text-gray-500 font-medium">Időszak:</span>
-          <Input
-            type="date"
-            size="sm"
-            value={fromDate}
-            onChange={e => setFromDate(e.target.value)}
-            className="w-auto"
-          />
-          <span className="text-gray-400 text-sm">–</span>
-          <Input
-            type="date"
-            size="sm"
-            value={toDate}
-            onChange={e => setToDate(e.target.value)}
-            className="w-auto"
-          />
-          {(fromDate || toDate) && (
-            <button
-              onClick={() => { setFromDate(''); setToDate('') }}
-              className="text-xs text-gray-400 hover:text-gray-600 underline"
-            >
-              Törlés
-            </button>
-          )}
-        </div>
+        <DateRangePicker
+          from={fromDate}
+          to={toDate}
+          onChange={(f, t) => { setFromDate(f); setToDate(t) }}
+          onClear={() => { setFromDate(''); setToDate('') }}
+        />
       )}
 
       {/* Summary bar */}
