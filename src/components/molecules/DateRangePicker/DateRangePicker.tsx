@@ -23,41 +23,62 @@ interface DateRangePickerProps {
 
 export function DateRangePicker({ from, to, onChange, onClear }: DateRangePickerProps) {
   const [open, setOpen] = useState(false)
+  // draft holds the in-progress selection; null = not editing
+  const [draft, setDraft] = useState<{ from: string; to: string } | null>(null)
   const ref = useRef<HTMLDivElement>(null)
+
+  const closePopup = () => {
+    setDraft(null)
+    setOpen(false)
+  }
 
   useEffect(() => {
     if (!open) return
     const handler = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false)
+      if (!ref.current?.contains(e.target as Node)) closePopup()
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
 
-  const range: DateRange | undefined = (from || to) ? {
-    from: from ? new Date(`${from}T00:00:00`) : undefined,
-    to: to ? new Date(`${to}T00:00:00`) : undefined,
+  // While popup is open, show the draft (in-progress pick); otherwise the committed value
+  const activeFrom = open && draft !== null ? draft.from : from
+  const activeTo   = open && draft !== null ? draft.to   : to
+
+  const range: DateRange | undefined = (activeFrom || activeTo) ? {
+    from: activeFrom ? new Date(`${activeFrom}T00:00:00`) : undefined,
+    to:   activeTo   ? new Date(`${activeTo}T00:00:00`)   : undefined,
   } : undefined
 
   const handleSelect = (r: DateRange | undefined) => {
     const f = r?.from ? toLocalStr(r.from) : ''
-    const t = r?.to ? toLocalStr(r.to) : ''
-    onChange(f, t)
-    // v10: empty range → { from: date, to: date } (min=0 default), so guard against same-day close
-    if (f && t && f !== t) setOpen(false)
+    const t = r?.to   ? toLocalStr(r.to)   : ''
+    setDraft({ from: f, to: t })
+    // Propagate to parent (and close) only when a complete range is chosen
+    if (f && t && f !== t) {
+      onChange(f, t)
+      setDraft(null)
+      setOpen(false)
+    }
   }
 
   const hasValue = !!(from || to)
-  const label = from && to
-    ? `${fmt(from)} – ${fmt(to)}`
-    : from ? `${fmt(from)} – …`
+
+  // Button label: show draft progress while open, committed value when closed
+  const labelFrom = open && draft ? draft.from : from
+  const labelTo   = open && draft ? draft.to   : to
+  const label = labelFrom && labelTo && labelFrom !== labelTo
+    ? `${fmt(labelFrom)} – ${fmt(labelTo)}`
+    : labelFrom ? `${fmt(labelFrom)} – …`
     : 'Időszak kiválasztása'
 
   return (
     <div ref={ref} className="relative inline-flex items-center gap-1.5">
       <button
         type="button"
-        onClick={() => setOpen(o => !o)}
+        onClick={() => {
+          if (open) { closePopup() } else { setDraft(null); setOpen(true) }
+        }}
         className={[
           'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors',
           hasValue || open
@@ -72,7 +93,7 @@ export function DateRangePicker({ from, to, onChange, onClear }: DateRangePicker
         {label}
       </button>
 
-      {hasValue && (
+      {hasValue && !open && (
         <button
           type="button"
           onClick={onClear}
