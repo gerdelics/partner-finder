@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Input } from '@/components/atoms/Input'
 import { Select } from '@/components/atoms/Select'
-import { Checkbox } from '@/components/atoms/Checkbox'
 import { Button } from '@/components/atoms/Button'
 import { COUNTRY_OPTIONS, VEHICLE_OPTIONS } from '@/types/partner'
 import { STATUSZ_OPTIONS } from '@/types/fuvar'

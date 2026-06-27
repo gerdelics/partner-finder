@@ -1,4 +1,4 @@
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string
   labelSize?: 'sm' | 'xs'
   error?: string
