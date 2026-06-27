@@ -43,7 +43,8 @@ export function DateRangePicker({ from, to, onChange, onClear }: DateRangePicker
     const f = r?.from ? toLocalStr(r.from) : ''
     const t = r?.to ? toLocalStr(r.to) : ''
     onChange(f, t)
-    if (f && t) setOpen(false)
+    // v10: empty range → { from: date, to: date } (min=0 default), so guard against same-day close
+    if (f && t && f !== t) setOpen(false)
   }
 
   const hasValue = !!(from || to)

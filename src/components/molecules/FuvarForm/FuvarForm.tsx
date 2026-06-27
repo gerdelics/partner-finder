@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Input } from '@/components/atoms/Input'
 import { Select } from '@/components/atoms/Select'
 import { Button } from '@/components/atoms/Button'
+import { DatePicker } from '@/components/molecules/DatePicker'
 import { COUNTRY_OPTIONS, VEHICLE_OPTIONS } from '@/types/partner'
 import { STATUSZ_OPTIONS } from '@/types/fuvar'
 import type { Fuvar, FuvarInput } from '@/types/fuvar'
@@ -128,13 +129,12 @@ export function FuvarForm({ initialValues, partners, onSubmit, onCancel, isLoadi
             placeholder="0"
           />
         </div>
-        <Input
+        <DatePicker
           id="fuvar-datum"
           label="Szükséges dátum"
           labelSize="xs"
-          type="date"
           value={form.datum}
-          onChange={e => set('datum', e.target.value)}
+          onChange={v => set('datum', v)}
         />
       </fieldset>
 
