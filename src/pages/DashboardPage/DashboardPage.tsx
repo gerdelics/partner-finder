@@ -9,16 +9,16 @@ import { Button } from '@/components/atoms/Button'
 import { MainLayout } from '@/components/templates/MainLayout'
 import { usePartners } from '@/hooks/usePartners'
 import { useSearch } from '@/hooks/useSearch'
-import { signOut } from '@/services/authService'
 import type { PartnerInput } from '@/types/partner'
 
 interface DashboardPageProps {
   user: User
+  onSignOut: () => void
 }
 
 type ModalMode = 'add' | 'edit' | null
 
-export function DashboardPage({ user }: DashboardPageProps) {
+export function DashboardPage({ user, onSignOut }: DashboardPageProps) {
   const { partners, loading, addPartner, updatePartner, deletePartner } = usePartners(user.uid)
   const { results, query, setQuery, filters, setFilters, reset } = useSearch(partners)
 
@@ -44,7 +44,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
   }
 
   return (
-    <MainLayout header={<AppHeader user={user} onSignOut={signOut} />}>
+    <MainLayout header={<AppHeader user={user} onSignOut={onSignOut} />}>
       <div className="flex flex-col gap-3 sm:gap-4">
         <FilterBar
           query={query}

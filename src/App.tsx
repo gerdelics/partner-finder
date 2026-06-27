@@ -1,4 +1,5 @@
 import { useAuth } from '@/hooks/useAuth'
+import { signInWithEmail } from '@/services/authService'
 import { LoginPage } from '@/pages/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 
@@ -14,9 +15,9 @@ function Spinner() {
 }
 
 export default function App() {
-  const { user, loading, signInWithGoogle } = useAuth()
+  const { user, loading, signOut } = useAuth()
 
   if (loading) return <Spinner />
-  if (!user) return <LoginPage onSignIn={signInWithGoogle} />
-  return <DashboardPage user={user} />
+  if (!user) return <LoginPage onSignIn={signInWithEmail} />
+  return <DashboardPage user={user} onSignOut={signOut} />
 }
