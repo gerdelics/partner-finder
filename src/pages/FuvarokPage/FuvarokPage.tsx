@@ -14,41 +14,39 @@ interface FuvarokPageProps {
 }
 
 type ModalMode = 'add' | 'edit' | null
-type TimeFilter = 'all' | '30d' | 'this-month' | 'last-month' | 'this-year'
+type QuickFilter = 'all' | '30d' | 'last-month' | 'custom'
 
-const HU_MONTHS = ['Január','Február','Március','Április','Május','Június','Július','Augusztus','Szeptember','Október','November','December']
-
-function timeFilterLabel(f: TimeFilter): string {
+function lastMonthPrefix(): string {
   const now = new Date()
-  if (f === 'all') return 'Összes'
-  if (f === '30d') return 'Elmúlt 30 nap'
-  if (f === 'this-month') return HU_MONTHS[now.getMonth()]
-  if (f === 'last-month') return HU_MONTHS[new Date(now.getFullYear(), now.getMonth() - 1).getMonth()]
-  return `${now.getFullYear()}`
+  const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  return `${lm.getFullYear()}-${String(lm.getMonth() + 1).padStart(2, '0')}`
 }
 
-function applyTimeFilter(fuvarok: Fuvar[], f: TimeFilter): Fuvar[] {
-  if (f === 'all') return fuvarok
-  const now = new Date()
-  if (f === '30d') {
+function applyFilter(fuvarok: Fuvar[], q: QuickFilter, from: string, to: string): Fuvar[] {
+  if (q === 'all') return fuvarok
+  if (q === '30d') {
     const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30)
     const s = cutoff.toISOString().slice(0, 10)
     return fuvarok.filter(x => x.datum >= s)
   }
-  if (f === 'this-month') {
-    const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  if (q === 'last-month') {
+    const prefix = lastMonthPrefix()
     return fuvarok.filter(x => x.datum.startsWith(prefix))
   }
-  if (f === 'last-month') {
-    const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    const prefix = `${lm.getFullYear()}-${String(lm.getMonth() + 1).padStart(2, '0')}`
-    return fuvarok.filter(x => x.datum.startsWith(prefix))
-  }
-  // this-year
-  return fuvarok.filter(x => x.datum.startsWith(`${now.getFullYear()}`))
+  // custom
+  return fuvarok.filter(x =>
+    (!from || x.datum >= from) && (!to || x.datum <= to)
+  )
 }
 
-const TIME_FILTERS: TimeFilter[] = ['all', '30d', 'this-month', 'last-month', 'this-year']
+const QUICK: { value: QuickFilter; label: string }[] = [
+  { value: 'all', label: 'Összes' },
+  { value: '30d', label: 'Elmúlt 30 nap' },
+  { value: 'last-month', label: 'Előző hónap' },
+  { value: 'custom', label: 'Egyéni' },
+]
+
+const inputCls = 'border border-gray-300 rounded-lg px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
 
 export function FuvarokPage({ user, partners }: FuvarokPageProps) {
   const { fuvarok, loading, addFuvar, updateFuvar, deleteFuvar } = useFuvarok(user.uid)
@@ -56,9 +54,12 @@ export function FuvarokPage({ user, partners }: FuvarokPageProps) {
   const [editTarget, setEditTarget] = useState<Fuvar | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>('this-month')
 
-  const filtered = applyTimeFilter(fuvarok, timeFilter)
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
+
+  const filtered = applyFilter(fuvarok, quickFilter, fromDate, toDate)
 
   const handleSave = async (input: FuvarInput) => {
     setSaving(true)
@@ -72,11 +73,7 @@ export function FuvarokPage({ user, partners }: FuvarokPageProps) {
     }
   }
 
-  const handleEdit = (f: Fuvar) => {
-    setEditTarget(f)
-    setModalMode('edit')
-  }
-
+  const handleEdit = (f: Fuvar) => { setEditTarget(f); setModalMode('edit') }
   const handleDelete = async () => {
     if (!deleteTarget) return
     await deleteFuvar(deleteTarget)
@@ -88,23 +85,51 @@ export function FuvarokPage({ user, partners }: FuvarokPageProps) {
 
   return (
     <div className="flex flex-col gap-3 sm:gap-4">
-      {/* Time filter chips */}
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-        {TIME_FILTERS.map(f => (
+      {/* Quick filter chips */}
+      <div className="flex flex-wrap gap-2">
+        {QUICK.map(q => (
           <button
-            key={f}
-            onClick={() => setTimeFilter(f)}
+            key={q.value}
+            onClick={() => setQuickFilter(q.value)}
             className={[
-              'shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
-              timeFilter === f
+              'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+              quickFilter === q.value
                 ? 'bg-slate-800 text-white'
                 : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50',
             ].join(' ')}
           >
-            {timeFilterLabel(f)}
+            {q.label}
           </button>
         ))}
       </div>
+
+      {/* Date range picker — only when custom is selected */}
+      {quickFilter === 'custom' && (
+        <div className="flex flex-wrap items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2.5">
+          <span className="text-xs text-gray-500 font-medium">Időszak:</span>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={e => setFromDate(e.target.value)}
+            className={inputCls}
+          />
+          <span className="text-gray-400 text-sm">–</span>
+          <input
+            type="date"
+            value={toDate}
+            onChange={e => setToDate(e.target.value)}
+            className={inputCls}
+          />
+          {(fromDate || toDate) && (
+            <button
+              onClick={() => { setFromDate(''); setToDate('') }}
+              className="text-xs text-gray-400 hover:text-gray-600 underline"
+            >
+              Törlés
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Summary bar */}
       <div className="grid grid-cols-3 gap-2 text-center">
@@ -124,7 +149,7 @@ export function FuvarokPage({ user, partners }: FuvarokPageProps) {
         </div>
       </div>
 
-      {/* Toolbar */}
+      {/* Desktop toolbar */}
       <div className="hidden md:flex gap-2 items-center">
         <button onClick={() => { setEditTarget(null); setModalMode('add') }}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg">
@@ -150,9 +175,7 @@ export function FuvarokPage({ user, partners }: FuvarokPageProps) {
         onClick={() => { setEditTarget(null); setModalMode('add') }}
         className="fixed bottom-20 right-5 md:hidden z-30 w-14 h-14 rounded-full bg-blue-600 text-white shadow-xl flex items-center justify-center text-3xl leading-none active:scale-95 transition-transform"
         aria-label="Új fuvar"
-      >
-        +
-      </button>
+      >+</button>
 
       {/* Modal */}
       {modalMode && (

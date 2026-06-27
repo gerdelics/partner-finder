@@ -1,32 +1,64 @@
-# React + TypeScript + Vite
+# PartnerFinder — for Fodor Bence
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Spedíciós munkafolyamatot támogató PWA: fuvarozó partnerek kezelése, fuvarok nyomon követése és árrés optimalizálás.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 18 + TypeScript** — Vite 8, Atomic Design
+- **Firebase Auth** — email/jelszó bejelentkezés
+- **Firebase Realtime Database** — valós idejű adatszinkron, offline localStorage cache
+- **Tailwind CSS v4** — mobilra optimalizált UI
+- **vite-plugin-pwa** — telepíthető PWA, service worker
 
-## React Compiler
+## Funkciók
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Funkció | Leírás |
+|---|---|
+| Partner CRUD | Fuvarozó partnerek kezelése (név, telefon, email, országok, jármű típus, ADR, emelőhátfal, részrakomány) |
+| Intelligens keresés | NLP token alapú offline keresés (pl. „18t ADR román") |
+| Szűrők | Ország, járműtípus, teherbírás, értékelés, szabad kapacitás |
+| Partner értékelés | 1–5 csillag, szabad kapacitás jelzés |
+| Ártörténet | Partner szintű árajánlat napló (útvonal, összeg, elfogadva/elutasítva) |
+| Fuvar-követő | Fuvarok rögzítése ügyfél- és fuvarozói árakkal, valós idejű árrés számítással |
+| Időszűrő | Összes / Elmúlt 30 nap / Előző hónap / Egyéni dátumintervallum |
+| Árrés kalkulátor | Gyors overlay számológép telefonálás közben |
+| CSV export | Partner- és fuvarlista letöltése Excel-kompatibilis formátumban |
+| PWA | Telepíthető mobilra, offline olvasás localStorage cache-ből |
 
-## Expanding the Oxlint configuration
+## Fejlesztés
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+A `.env` fájlhoz szükséges változók (lokálisan hozd létre, ne commitold):
+
+```
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_DATABASE_URL=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_APP_ID=...
+```
+
+## Adatbázis szabályok deploy
+
+```bash
+firebase login
+firebase deploy --only database
+```
+
+## Seed adatok
+
+10 partner + 10 fuvar betöltése a DB-be:
+
+```bash
+node seed.mjs <email> <jelszo>
+```
+
+## Deploy
+
+A `main` branch push-ra automatikusan deployol GitHub Pages-re a `.github/workflows/deploy.yml` pipeline via GitHub Actions. A Firebase credentials GitHub Secrets-ként kell beállítani (`VITE_FIREBASE_*`).
+
+Live: `https://gerdelics.github.io/partner-finder/`
