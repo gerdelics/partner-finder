@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Button } from '@/components/atoms/Button'
 import { Input } from '@/components/atoms/Input'
+import { Select } from '@/components/atoms/Select'
+import { Textarea } from '@/components/atoms/Textarea'
 import { Checkbox } from '@/components/atoms/Checkbox'
 import { StarRating } from '@/components/atoms/StarRating'
 import type { Partner, PartnerInput, PriceHistoryEntry } from '@/types/partner'
@@ -98,8 +100,6 @@ export function PartnerForm({ initialValues, onSubmit, onCancel, isLoading }: Pa
     if (validate()) onSubmit(form)
   }
 
-  const selectCls = 'border border-gray-300 rounded-md px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -173,39 +173,52 @@ export function PartnerForm({ initialValues, onSubmit, onCancel, isLoading }: Pa
             ))}
           </div>
         )}
-        <div className="flex flex-wrap gap-2 items-end bg-gray-50 rounded-lg p-2">
-          <select className={selectCls} value={newPrice.fromCountry}
-            onChange={e => setNewPrice(p => ({ ...p, fromCountry: e.target.value }))}>
+        <div className="flex flex-wrap gap-2 items-end bg-gray-50 rounded-xl p-2">
+          <Select
+            size="sm"
+            value={newPrice.fromCountry}
+            onChange={e => setNewPrice(p => ({ ...p, fromCountry: e.target.value }))}
+            className="w-28"
+          >
             <option value="">Honnan</option>
             {COUNTRY_OPTIONS.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
-          </select>
-          <select className={selectCls} value={newPrice.toCountry}
-            onChange={e => setNewPrice(p => ({ ...p, toCountry: e.target.value }))}>
+          </Select>
+          <Select
+            size="sm"
+            value={newPrice.toCountry}
+            onChange={e => setNewPrice(p => ({ ...p, toCountry: e.target.value }))}
+            className="w-28"
+          >
             <option value="">Hova</option>
             {COUNTRY_OPTIONS.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
-          </select>
-          <input type="number" placeholder="EUR" value={newPrice.ar}
+          </Select>
+          <Input
+            size="sm"
+            type="number"
+            placeholder="EUR"
+            value={newPrice.ar}
             onChange={e => setNewPrice(p => ({ ...p, ar: e.target.value }))}
-            className={selectCls + ' w-20'} />
-          <label className="flex items-center gap-1 text-xs text-gray-600">
-            <input type="checkbox" checked={newPrice.elfogadva}
-              onChange={e => setNewPrice(p => ({ ...p, elfogadva: e.target.checked }))} />
-            Elfog.
-          </label>
-          <button type="button" onClick={addPriceEntry}
-            className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-500">
-            + Hozzáad
-          </button>
+            className="w-20"
+          />
+          <Checkbox
+            id="price-entry-elfogadva"
+            label="Elfog."
+            checked={newPrice.elfogadva}
+            onChange={v => setNewPrice(p => ({ ...p, elfogadva: v }))}
+          />
+          <Button type="button" size="sm" onClick={addPriceEntry}>+ Hozzáad</Button>
         </div>
       </div>
 
       {/* Notes */}
-      <div className="flex flex-col gap-1">
-        <label htmlFor="form-notes" className="text-sm font-medium text-gray-700">Megjegyzés</label>
-        <textarea id="form-notes" value={form.notes} onChange={e => set('notes', e.target.value)}
-          rows={2} placeholder="Egyéb megjegyzések..."
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
-      </div>
+      <Textarea
+        id="form-notes"
+        label="Megjegyzés"
+        value={form.notes}
+        onChange={e => set('notes', e.target.value)}
+        rows={2}
+        placeholder="Egyéb megjegyzések..."
+      />
 
       <div className="flex gap-2 justify-end pt-2 border-t border-gray-100">
         <Button variant="ghost" type="button" onClick={onCancel}>Mégsem</Button>

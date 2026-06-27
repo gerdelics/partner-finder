@@ -3,6 +3,7 @@ import type { User } from 'firebase/auth'
 import { FuvarList } from '@/components/organisms/FuvarList'
 import { FuvarForm } from '@/components/molecules/FuvarForm'
 import { ConfirmDialog } from '@/components/molecules/ConfirmDialog'
+import { Input } from '@/components/atoms/Input'
 import { useFuvarok } from '@/hooks/useFuvarok'
 import { exportFuvarok } from '@/utils/exportCsv'
 import type { Fuvar, FuvarInput } from '@/types/fuvar'
@@ -45,8 +46,6 @@ const QUICK: { value: QuickFilter; label: string }[] = [
   { value: 'last-month', label: 'Előző hónap' },
   { value: 'custom', label: 'Egyéni' },
 ]
-
-const inputCls = 'border border-gray-300 rounded-lg px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
 
 export function FuvarokPage({ user, partners }: FuvarokPageProps) {
   const { fuvarok, loading, addFuvar, updateFuvar, deleteFuvar } = useFuvarok(user.uid)
@@ -107,18 +106,20 @@ export function FuvarokPage({ user, partners }: FuvarokPageProps) {
       {quickFilter === 'custom' && (
         <div className="flex flex-wrap items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2.5">
           <span className="text-xs text-gray-500 font-medium">Időszak:</span>
-          <input
+          <Input
             type="date"
+            size="sm"
             value={fromDate}
             onChange={e => setFromDate(e.target.value)}
-            className={inputCls}
+            className="w-auto"
           />
           <span className="text-gray-400 text-sm">–</span>
-          <input
+          <Input
             type="date"
+            size="sm"
             value={toDate}
             onChange={e => setToDate(e.target.value)}
-            className={inputCls}
+            className="w-auto"
           />
           {(fromDate || toDate) && (
             <button

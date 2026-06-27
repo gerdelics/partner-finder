@@ -1,8 +1,7 @@
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string
   labelSize?: 'sm' | 'xs'
   error?: string
-  size?: 'md' | 'sm'
 }
 
 const labelCls = {
@@ -10,15 +9,10 @@ const labelCls = {
   xs: 'text-xs font-medium text-gray-600',
 }
 
-const sizeCls = {
-  md: 'px-3 py-2',
-  sm: 'px-2 py-1.5',
-}
-
-export function Input({
+export function Textarea({
   label, labelSize = 'sm', error,
-  size = 'md', id, className = '', ...props
-}: InputProps) {
+  id, className = '', ...props
+}: TextareaProps) {
   return (
     <div className="flex flex-col gap-1">
       {label && (
@@ -26,13 +20,12 @@ export function Input({
           {label}
         </label>
       )}
-      <input
+      <textarea
         id={id}
         {...props}
         className={[
-          'border rounded-lg text-sm w-full transition-colors',
+          'border rounded-lg px-3 py-2 text-sm w-full transition-colors resize-none',
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-          sizeCls[size],
           error ? 'border-red-400' : 'border-gray-300',
           className,
         ].join(' ')}
