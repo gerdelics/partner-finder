@@ -9,6 +9,8 @@ const DEFAULT_FILTERS: SearchFilters = {
   tailLift: null,
   adr: null,
   partialLoad: null,
+  minRating: null,
+  availableOnly: false,
 }
 
 function isFiltersEmpty(f: SearchFilters) {
@@ -18,7 +20,9 @@ function isFiltersEmpty(f: SearchFilters) {
     f.minCapacity === null &&
     f.tailLift === null &&
     f.adr === null &&
-    f.partialLoad === null
+    f.partialLoad === null &&
+    f.minRating === null &&
+    !f.availableOnly
   )
 }
 
@@ -29,7 +33,12 @@ export function useSearch(partners: Partner[]) {
   const results = useMemo(() => {
     if (!query.trim() && isFiltersEmpty(filters)) return partners
     const parsed = parseNLPQuery(query)
-    return partners.filter(p => matchesQuery(p, parsed, filters))
+    return partners.filter(p => {
+      if (!matchesQuery(p, parsed, filters)) return false
+      if (filters.minRating !== null && (p.rating ?? 0) < filters.minRating) return false
+      if (filters.availableOnly && !p.available) return false
+      return true
+    })
   }, [partners, query, filters])
 
   const reset = () => {

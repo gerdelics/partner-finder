@@ -1,3 +1,13 @@
+export interface PriceHistoryEntry {
+  id: string
+  datum: string        // ISO date
+  fromCountry: string
+  toCountry: string
+  ar: number
+  elfogadva: boolean
+  megjegyzes: string
+}
+
 export interface Partner {
   id: string
   name: string
@@ -10,6 +20,9 @@ export interface Partner {
   adr: boolean
   partialLoad: boolean
   notes: string
+  rating: number | null    // 1-5
+  available: boolean
+  priceHistory: PriceHistoryEntry[]
   createdAt: string
   updatedAt: string
 }
@@ -23,6 +36,8 @@ export interface SearchFilters {
   tailLift: boolean | null
   adr: boolean | null
   partialLoad: boolean | null
+  minRating: number | null
+  availableOnly: boolean
 }
 
 export const VEHICLE_OPTIONS = [

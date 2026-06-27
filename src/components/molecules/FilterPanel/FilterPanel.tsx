@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Checkbox } from '@/components/atoms/Checkbox'
 import { Input } from '@/components/atoms/Input'
+import { StarRating } from '@/components/atoms/StarRating'
 import type { SearchFilters } from '@/types/partner'
 import { COUNTRY_OPTIONS, VEHICLE_OPTIONS } from '@/types/partner'
 
@@ -139,6 +140,30 @@ export function FilterPanel({ filters, onChange }: FilterPanelProps) {
           label="Részrakomány"
           value={filters.partialLoad}
           onChange={v => onChange({ ...filters, partialLoad: v })}
+        />
+      </div>
+
+      {/* Rating + availability */}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-medium text-gray-700">Min. értékelés</span>
+          <div className="flex items-center gap-2">
+            <StarRating
+              value={filters.minRating}
+              onChange={v => onChange({ ...filters, minRating: v })}
+              size="sm"
+            />
+            {filters.minRating && (
+              <button type="button" onClick={() => onChange({ ...filters, minRating: null })}
+                className="text-xs text-gray-400 hover:text-gray-600">törlés</button>
+            )}
+          </div>
+        </div>
+        <Checkbox
+          id="filter-available"
+          label="Csak szabad kapacitás"
+          checked={filters.availableOnly}
+          onChange={v => onChange({ ...filters, availableOnly: v })}
         />
       </div>
     </div>
