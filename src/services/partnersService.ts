@@ -21,9 +21,9 @@ function toRtdb(input: PartnerInput): RtdbPartnerData {
     ...rest,
     countries: Object.fromEntries(countries.map(c => [c, true])),
     vehicleTypes: Object.fromEntries(vehicleTypes.map(v => [v, true])),
-    priceHistory: priceHistory.length
-      ? Object.fromEntries(priceHistory.map(({ id, ...e }) => [id, e]))
-      : undefined,
+    ...(priceHistory.length
+      ? { priceHistory: Object.fromEntries(priceHistory.map(({ id, ...e }) => [id, e])) }
+      : {}),
   }
 }
 
