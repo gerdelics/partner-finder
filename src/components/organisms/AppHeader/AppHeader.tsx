@@ -17,7 +17,10 @@ export function AppHeader({ user, onSignOut, onCalc, onExport }: AppHeaderProps)
         <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-500 rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm shrink-0">
           PF
         </div>
-        <h1 className="text-base sm:text-lg font-semibold tracking-tight">PartnerFinder</h1>
+        <div className="flex flex-col leading-tight">
+          <h1 className="text-base sm:text-lg font-semibold tracking-tight">PartnerFinder</h1>
+          <span className="text-[10px] text-slate-400 tracking-widest uppercase">for Fodor Bence</span>
+        </div>
       </div>
 
       <div className="flex items-center gap-1 sm:gap-2">
