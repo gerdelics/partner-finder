@@ -23,11 +23,16 @@ const EMPTY: FuvarInput = {
 }
 
 export function FuvarForm({ initialValues, partners, onSubmit, onCancel, isLoading }: FuvarFormProps) {
-  const [form, setForm] = useState<FuvarInput>(
-    initialValues
-      ? (({ id, createdAt, updatedAt, ...rest }) => rest)(initialValues)
-      : EMPTY
-  )
+  const [form, setForm] = useState<FuvarInput>(() => {
+    if (!initialValues) return EMPTY
+    const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = initialValues
+    // Ha partnerId null, de partnerNev van, megpróbáljuk névből megtalálni
+    if (!rest.partnerId && rest.partnerNev) {
+      const match = partners.find(p => p.name === rest.partnerNev)
+      if (match) return { ...rest, partnerId: match.id }
+    }
+    return rest
+  })
 
   const set = (field: keyof FuvarInput, value: FuvarInput[keyof FuvarInput]) =>
     setForm(f => ({ ...f, [field]: value }))

@@ -257,6 +257,7 @@ async function main() {
   console.log(`OK, UID: ${uid}\n`)
 
   console.log('Partnerek feltöltése...')
+  const partnerIdsByName = {}
   for (const p of PARTNERS) {
     const { countries, vehicleTypes, priceHistory, ...rest } = p
     const id = await pushPartner(uid, idToken, {
@@ -266,14 +267,16 @@ async function main() {
       priceHistory: Object.keys(priceHistory).length ? priceHistory : undefined,
       createdAt: now(), updatedAt: now(),
     })
+    partnerIdsByName[p.name] = id
     console.log(`  ✓ ${p.name} → ${id}`)
   }
 
   console.log('\nFuvarok feltöltése...')
   for (const f of FUVAROK) {
+    const partnerId = partnerIdsByName[f.partnerNev] ?? null
     const id = await pushFuvar(uid, idToken, {
       ...f,
-      partnerId: null,
+      partnerId,
       createdAt: now(), updatedAt: now(),
     })
     console.log(`  ✓ ${f.ugyfelNev} (${f.fromCountry}→${f.toCountry}) → ${id}`)
