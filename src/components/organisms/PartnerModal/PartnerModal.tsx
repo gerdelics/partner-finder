@@ -19,8 +19,10 @@ export function PartnerModal({ mode, partner, onSave, onClose }: PartnerModalPro
     try {
       await onSave(input)
       onClose()
-    } catch {
-      setError('Hiba történt a mentés során. Kérjük próbáld újra.')
+    } catch (err) {
+      console.error('Partner mentési hiba:', err)
+      const msg = err instanceof Error ? err.message : String(err)
+      setError(`Mentési hiba: ${msg}`)
     } finally {
       setIsLoading(false)
     }
