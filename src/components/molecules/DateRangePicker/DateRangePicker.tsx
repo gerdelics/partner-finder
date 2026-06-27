@@ -92,7 +92,7 @@ export function DateRangePicker({ from, to, onChange, onClear }: DateRangePicker
             showOutsideDays
             fixedWeeks
             formatters={{
-              formatMonthCaption: (d: Date) => `${HU_MONTHS[d.getMonth()]} ${d.getFullYear()}`,
+              formatCaption: (d: Date) => `${HU_MONTHS[d.getMonth()]} ${d.getFullYear()}`,
               formatWeekdayName: (d: Date) => HU_WEEKDAYS[d.getDay()],
             }}
           />
